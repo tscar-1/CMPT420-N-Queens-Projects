@@ -1,6 +1,6 @@
 # CMPT420-N-Queens-Projects
 
-Members: Gary LaPicola, Louis Celiberti, Thomas Scardino
+Members: Gary LaPicola, Louie Celiberti, Thomas Scardino
 
 Project 3: Generate a random 8-queens instance and solve it (where possible) using hill climbing search (steepest-ascent version).
 
