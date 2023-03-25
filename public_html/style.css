@@ -1,34 +1,35 @@
-*
+#table, #tableDiv
 {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-.board
-{
-    margin: 0;
-    padding: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fit,80px);
-    grid-template-rows: repeat(auto-fit,80px);
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 640px;
-    height: 640px;
     border: 1px solid black;
+    border-collapse: collapse;
 }
-
-.square
+#buttonDiv
+{
+    display: flex;
+    justify-content:center;
+    margin-top: 20px;
+}
+td,tr
 {
     height: 80px;
     width: 80px;
     border: 1px solid black;
+    border-collapse: collapse;
+    padding:0;
+    margin:0;
 }
-.black
+tr:nth-child(even) td 
 {
-    background: black;
+    background-color: lightgray;		
 }
-
+tr:nth-child(odd) td 
+{
+    background-color: white;
+}
+#img
+{
+    max-height: 100%;
+    max-width: 100%; 
+}
+                
+              
