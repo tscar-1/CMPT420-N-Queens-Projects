@@ -124,7 +124,7 @@ public class GUI extends JFrame implements ActionListener {
             queens[i][j] = true;
             tiles[i][j].setBackground(Color.RED);
         }
-        int currentHeuristic = calculateHeuristics(queens);
+        int currentHeuristic = hillclimbingHeuristics(queens);
 
         // Perform the hillclimbing search
         int iterations = 0;
@@ -146,7 +146,7 @@ public class GUI extends JFrame implements ActionListener {
                     if (j != currentRow) {
                         queens[i][j] = true;
                         queens[i][currentRow] = false;
-                        int newHeuristic = calculateHeuristics(queens);
+                        int newHeuristic = hillclimbingHeuristics(queens);
                         if (newHeuristic < bestHeuristic) {
                             bestHeuristic = newHeuristic;
                             bestMove[0] = i;
@@ -181,7 +181,7 @@ public class GUI extends JFrame implements ActionListener {
         }
     }
 
-    private int calculateHeuristics(boolean[][] queens) {
+    private int hillclimbingHeuristics(boolean[][] queens) {
         int h = 0;
         // Check conflicts in each column
         for (int col = 0; col < n; col++) {
