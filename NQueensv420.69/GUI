@@ -1,0 +1,254 @@
+package nqueens;
+
+import java.util.Random;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.concurrent.atomic.AtomicInteger;
+
+public class GUI extends JFrame implements ActionListener {
+
+    private int n;
+    private Random rand;
+    private boolean solved;
+
+    private JPanel boardPanel;
+    private JButton[][] tiles;
+    private boolean[][] queens;
+
+    private JPanel buttonsPanel;
+    private JButton backtrackingButton;
+    private JButton hillclimbingButton;
+    private JButton resetButton;
+
+    private JTextArea outputArea;
+
+    public GUI(int n) {
+        this.n = n;
+        solved = false;
+        rand = new Random();
+
+        setTitle("NQueens");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(800, 600);
+        setLayout(new BorderLayout());
+
+        boardPanel = new JPanel(new GridLayout(n, n));
+        tiles = new JButton[n][n];
+        queens = new boolean[n][n];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                tiles[i][j] = new JButton();
+                tiles[i][j].setOpaque(true);
+                tiles[i][j].setPreferredSize(new Dimension(50, 50));
+                //tiles[i][j].addActionListener(this);
+                boardPanel.add(tiles[i][j]);
+            }
+        }
+        boardPanel.setPreferredSize(new Dimension(500, 500));
+        boardPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        add(boardPanel, BorderLayout.WEST);
+
+        // Create the buttons panel
+        buttonsPanel = new JPanel();
+        backtrackingButton = new JButton("Recursive Backtracking");
+        backtrackingButton.addActionListener(this);
+        hillclimbingButton = new JButton("Steepest Ascent Hillclimbing");
+        hillclimbingButton.addActionListener(this);
+        resetButton = new JButton("Reset");
+        resetButton.addActionListener(this);
+        buttonsPanel.add(backtrackingButton);
+        buttonsPanel.add(hillclimbingButton);
+        buttonsPanel.add(resetButton);
+        add(buttonsPanel, BorderLayout.SOUTH);
+
+        // Create the output area
+        outputArea = new JTextArea();
+        outputArea.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(outputArea);
+        add(scrollPane, BorderLayout.CENTER);
+
+        // Show the GUI
+        setVisible(true);
+
+        int startingQueen = rand.nextInt(n);
+        queens[0][startingQueen] = true;
+        tiles[0][startingQueen].setBackground(Color.RED);
+    }
+
+    public void backtracking(int row, int[] count) {
+        if (row == n) {
+            solved = true;
+            outputArea.append("Solved in: " + count[0] + " steps\n");
+            return;
+        }
+
+        for (int col = 0; col < n; col++) {
+            if (!backtrackingConflicts(row, col)) {
+                queens[row][col] = true;
+                tiles[row][col].setBackground(Color.GREEN);
+                outputArea.append("Placed queen at (" + row + ", " + col + ")\n");
+                count[0]++;
+                backtracking(row + 1, count);
+                if (solved) {
+                    return;
+                }
+                queens[row][col] = false;
+                tiles[row][col].setBackground(null);
+                outputArea.append("Removed queen at (" + row + ", " + col + ")\n");
+                count[0]++;
+            }
+        }
+    }
+
+    public boolean backtrackingConflicts(int row, int col) {
+        for (int i = 0; i < row; i++) {
+            if (queens[i][col]) {
+                return true;
+            }
+            int j = row - i;
+            if (col - j >= 0 && queens[i][col - j]) {
+                return true;
+            }
+            if (col + j < n && queens[i][col + j]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void hillclimbing() {
+        // Initialize the current state as a random arrangement of queens
+        for (int i = 0; i < n; i++) {
+            int j = rand.nextInt(n);
+            queens[i][j] = true;
+            tiles[i][j].setBackground(Color.RED);
+        }
+        int currentHeuristic = calculateHeuristics(queens);
+
+        // Perform the hillclimbing search
+        int iterations = 0;
+        while (currentHeuristic > 0 && iterations < 1000) {
+            iterations++;
+            int bestHeuristic = currentHeuristic;
+            int[] bestMove = new int[2];
+
+            // Generate all possible successor states
+            for (int i = 0; i < n; i++) {
+                int currentRow = -1;
+                for (int j = 0; j < n; j++) {
+                    if (queens[i][j]) {
+                        currentRow = i;
+                        break;
+                    }
+                }
+                for (int j = 0; j < n; j++) {
+                    if (j != currentRow) {
+                        queens[i][j] = true;
+                        queens[i][currentRow] = false;
+                        int newHeuristic = calculateHeuristics(queens);
+                        if (newHeuristic < bestHeuristic) {
+                            bestHeuristic = newHeuristic;
+                            bestMove[0] = i;
+                            bestMove[1] = j;
+                        }
+                        queens[i][j] = false;
+                        queens[i][currentRow] = true;
+                    }
+                }
+            }
+
+            // Select the best successor state if it has a lower heuristic value
+            if (bestHeuristic < currentHeuristic) {
+                queens[bestMove[0]][bestMove[1]] = true;
+                queens[bestMove[0]][bestMove[0]] = false;
+                tiles[bestMove[0]][bestMove[1]].setBackground(Color.GREEN);
+                tiles[bestMove[0]][bestMove[0]].setBackground(null);
+                currentHeuristic = bestHeuristic;
+            } else {
+                break;
+            }
+        }
+
+        // Update the GUI and set the solved flag
+        if (currentHeuristic == 0) {
+            outputArea.append("Solution found!\n");
+            solved = true;
+        } else {
+            outputArea.append("No solution found, trying again.\n");
+            reset();
+            hillclimbing();
+        }
+    }
+
+    private int calculateHeuristics(boolean[][] queens) {
+        int h = 0;
+        // Check conflicts in each column
+        for (int col = 0; col < n; col++) {
+            int row = -1;
+            for (int r = 0; r < n; r++) {
+                if (queens[r][col]) {
+                    row = r;
+                    break;
+                }
+            }
+            for (int r = row + 1; r < n; r++) {
+                if (queens[r][col]) {
+                    h++;
+                }
+            }
+        }
+        // Check conflicts in each diagonal
+        for (int row = 0; row < n; row++) {
+            for (int col = 0; col < n; col++) {
+                if (queens[row][col]) {
+                    // Check diagonal towards top-right
+                    for (int i = 1; row + i < n && col + i < n; i++) {
+                        if (queens[row + i][col + i]) {
+                            h++;
+                        }
+                    }
+                    // Check diagonal towards bottom-right
+                    for (int i = 1; row - i >= 0 && col + i < n; i++) {
+                        if (queens[row - i][col + i]) {
+                            h++;
+                        }
+                    }
+                }
+            }
+        }
+        return h;
+    }
+
+    public void reset() {
+        tiles = new JButton[n][n];
+        queens = new boolean[n][n];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                tiles[i][j] = new JButton();
+                tiles[i][j].setOpaque(true);
+                tiles[i][j].setPreferredSize(new Dimension(50, 50));
+                boardPanel.add(tiles[i][j]);
+            }
+        }
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == backtrackingButton) {
+            int[] count = new int[1];
+            long start = System.currentTimeMillis();
+            backtracking(1, count);
+            long end = System.currentTimeMillis();
+            outputArea.append("Elapsed time: " + (end - start) + " ms\n");
+        } else if (e.getSource() == hillclimbingButton) {
+            long start = System.currentTimeMillis();
+            hillclimbing();
+            long end = System.currentTimeMillis();
+            outputArea.append("Elapsed time: " + (end - start) + " ms\n");
+        } else if (e.getSource() == resetButton) {
+            dispose();
+            new GUI(n);
+        }
+    }
+}
