@@ -1,0 +1,7 @@
+package nqueens;
+
+public class NQueens {
+    public static void main(String[] args) {
+        nGUI nGUI = new nGUI();
+    }
+}
