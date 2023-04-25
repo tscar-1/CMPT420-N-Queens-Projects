@@ -7,7 +7,6 @@ import java.awt.event.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class GUI extends JFrame implements ActionListener {
-
     private int n;
     private Random rand;
     private boolean solved;
@@ -24,24 +23,30 @@ public class GUI extends JFrame implements ActionListener {
     private JTextArea outputArea;
 
     public GUI(int n) {
+        // GUI is split into 3 sections
+        // boardPanel contains the NQueens board
+        // buttonPanel contains the Backtracking, Hillclimbing, and Reset buttons
+        // outputArea contains the text outputted by either algorithm
+        
         this.n = n;
         solved = false;
         rand = new Random();
 
-        setTitle("NQueens");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(800, 600);
-        setLayout(new BorderLayout());
+        // Basic construction of the GUI window
+        setTitle("NQueens"); // Title of the program
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Makes the program stop running when the window is closed. It would continue to run within NetBeans otherwise
+        setSize(800, 600); // Width/Height of the window
+        setLayout(new BorderLayout()); // Lets us layout the different panels of the GUI into different parts of the window
 
-        boardPanel = new JPanel(new GridLayout(n, n));
+        // Creates the boardPanel area of the GUI
+        boardPanel = new JPanel(new GridLayout(n, n)); // Constructs a new panel with a grid layout
         tiles = new JButton[n][n];
         queens = new boolean[n][n];
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 tiles[i][j] = new JButton();
                 tiles[i][j].setOpaque(true);
-                tiles[i][j].setPreferredSize(new Dimension(50, 50));
-                //tiles[i][j].addActionListener(this);
+                tiles[i][j].setPreferredSize(new Dimension(50, 50)); // Sets the size of the board's tiles
                 boardPanel.add(tiles[i][j]);
             }
         }
@@ -49,7 +54,7 @@ public class GUI extends JFrame implements ActionListener {
         boardPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         add(boardPanel, BorderLayout.WEST);
 
-        // Create the buttons panel
+        // Creates the buttons panel of the GUI
         buttonsPanel = new JPanel();
         backtrackingButton = new JButton("Recursive Backtracking");
         backtrackingButton.addActionListener(this);
@@ -62,22 +67,18 @@ public class GUI extends JFrame implements ActionListener {
         buttonsPanel.add(resetButton);
         add(buttonsPanel, BorderLayout.SOUTH);
 
-        // Create the output area
+        // Creates the outputArea of the GUI
         outputArea = new JTextArea();
-        outputArea.setEditable(false);
-        JScrollPane scrollPane = new JScrollPane(outputArea);
+        outputArea.setEditable(false); // Makes it so the outputArea cannot be editted
+        JScrollPane scrollPane = new JScrollPane(outputArea); // Makes the outputArea scrollable
         add(scrollPane, BorderLayout.CENTER);
 
-        // Show the GUI
         setVisible(true);
-
-        int startingQueen = rand.nextInt(n);
-        queens[0][startingQueen] = true;
-        tiles[0][startingQueen].setBackground(Color.RED);
     }
 
     public void backtracking(int row, int[] count) {
         if (row == n) {
+            // Returned if solution found
             solved = true;
             outputArea.append("Solved in: " + count[0] + " steps\n");
             return;
@@ -85,31 +86,36 @@ public class GUI extends JFrame implements ActionListener {
 
         for (int col = 0; col < n; col++) {
             if (!backtrackingConflicts(row, col)) {
-                queens[row][col] = true;
-                tiles[row][col].setBackground(Color.GREEN);
-                outputArea.append("Placed queen at (" + row + ", " + col + ")\n");
-                count[0]++;
-                backtracking(row + 1, count);
+                queens[row][col] = true; // Adds a queen to this position on the board if there are no conflicts
+                tiles[row][col].setBackground(Color.GREEN); // Sets the color of this position to green
+                outputArea.append("Placed queen at (" + row + ", " + col + ")\n"); // Adds this to the outputArea
+                count[0]++; // Increments steps taken
+                backtracking(row + 1, count); // Recursively calls the algo for the next row and updates the step count for the next recursion
                 if (solved) {
-                    return;
+                    return; // Breaks out of for loop when solution is found, else continues
                 }
-                queens[row][col] = false;
-                tiles[row][col].setBackground(null);
-                outputArea.append("Removed queen at (" + row + ", " + col + ")\n");
-                count[0]++;
+                queens[row][col] = false; // Removes a queen from this position if there are conflicts
+                tiles[row][col].setBackground(null); // Removes the color from this position
+                outputArea.append("Removed queen at (" + row + ", " + col + ")\n"); // Adds this to the outputArea
+                count[0]++; // Increments steps taken.
             }
         }
     }
 
     public boolean backtrackingConflicts(int row, int col) {
         for (int i = 0; i < row; i++) {
+            int j = row - i;
+            // Returns a conflict if there is a queen in the same column
             if (queens[i][col]) {
                 return true;
             }
-            int j = row - i;
+            
+            //Returns a conflict if there is a queen to the left diagonally
             if (col - j >= 0 && queens[i][col - j]) {
                 return true;
             }
+            
+            //Returns a conflict if there is a queen to the right diagonally
             if (col + j < n && queens[i][col + j]) {
                 return true;
             }
@@ -122,7 +128,7 @@ public class GUI extends JFrame implements ActionListener {
         for (int i = 0; i < n; i++) {
             int j = rand.nextInt(n);
             queens[i][j] = true;
-            tiles[i][j].setBackground(Color.RED);
+            tiles[i][j].setBackground(Color.GREEN);
         }
         int currentHeuristic = hillclimbingHeuristics(queens);
 
@@ -182,47 +188,67 @@ public class GUI extends JFrame implements ActionListener {
     }
 
     private int hillclimbingHeuristics(boolean[][] queens) {
-        int h = 0;
-        // Check conflicts in each column
-        for (int col = 0; col < n; col++) {
-            int row = -1;
-            for (int r = 0; r < n; r++) {
-                if (queens[r][col]) {
-                    row = r;
-                    break;
-                }
-            }
-            for (int r = row + 1; r < n; r++) {
-                if (queens[r][col]) {
-                    h++;
+        int conflicts = 0;
+
+        // Check row conflicts
+        for (int i = 0; i < n; i++) {
+            boolean conflict = false;
+            for (int j = 0; j < n; j++) {
+                if (queens[i][j]) {
+                    if (conflict) {
+                        conflicts++;
+                    }
+                    conflict = true;
+                } else {
+                    conflict = false;
                 }
             }
         }
-        // Check conflicts in each diagonal
-        for (int row = 0; row < n; row++) {
-            for (int col = 0; col < n; col++) {
-                if (queens[row][col]) {
-                    // Check diagonal towards top-right
-                    for (int i = 1; row + i < n && col + i < n; i++) {
-                        if (queens[row + i][col + i]) {
-                            h++;
-                        }
+
+        // Check column conflicts
+        for (int j = 0; j < n; j++) {
+            boolean conflict = false;
+            for (int i = 0; i < n; i++) {
+                if (queens[i][j]) {
+                    if (conflict) {
+                        conflicts++;
                     }
-                    // Check diagonal towards bottom-right
-                    for (int i = 1; row - i >= 0 && col + i < n; i++) {
-                        if (queens[row - i][col + i]) {
-                            h++;
+                    conflict = true;
+                } else {
+                    conflict = false;
+                }
+            }
+        }
+
+        // Check diagonal conflicts
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (queens[i][j]) {
+                    for (int k = 1; k < n; k++) {
+                        if (i - k >= 0 && j - k >= 0 && queens[i - k][j - k]) {
+                            conflicts += 2;
+                        }
+                        if (i - k >= 0 && j + k < n && queens[i - k][j + k]) {
+                            conflicts += 2;
                         }
                     }
                 }
             }
         }
-        return h;
+
+        // Penalize invalid states more heavily
+        if (conflicts > 0) {
+            conflicts += 50;
+        }
+
+        return conflicts;
     }
 
     public void reset() {
+        // Not working, not used
         tiles = new JButton[n][n];
         queens = new boolean[n][n];
+        
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 tiles[i][j] = new JButton();
@@ -233,20 +259,34 @@ public class GUI extends JFrame implements ActionListener {
         }
     }
 
+    //Method to tell GUI what to do when a button is pressed
     @Override
     public void actionPerformed(ActionEvent e) {
+        // Action for pressing the backtracking button
         if (e.getSource() == backtrackingButton) {
-            int[] count = new int[1];
-            long start = System.currentTimeMillis();
+            //Places a starting queen in a random column of row 0
+            int startingQueen = rand.nextInt(n);
+            queens[0][startingQueen] = true;
+            tiles[0][startingQueen].setBackground(Color.RED);
+            
+            int[] count = new int[1]; // Initialization for the amount of steps taken during one run of the backtracking algo
+            long start = System.currentTimeMillis(); // Gets the current time before the backtracking algo starts
             backtracking(1, count);
-            long end = System.currentTimeMillis();
+            long end = System.currentTimeMillis(); // Gets the current time after the backtracking algo stops
             outputArea.append("Elapsed time: " + (end - start) + " ms\n");
-        } else if (e.getSource() == hillclimbingButton) {
-            long start = System.currentTimeMillis();
+        }
+        
+        // Action for pressing the hillclimbing button
+        else if (e.getSource() == hillclimbingButton) {
+            long start = System.currentTimeMillis(); // Gets the current time before the hillclimbing algo starts
             hillclimbing();
-            long end = System.currentTimeMillis();
+            long end = System.currentTimeMillis(); // Gets the current time after the hillclimbing algo stops
             outputArea.append("Elapsed time: " + (end - start) + " ms\n");
-        } else if (e.getSource() == resetButton) {
+        }
+        
+        // Action for pressing the reset button
+        else if (e.getSource() == resetButton) {
+            // Closes the current GUI window and regenerates a new one
             dispose();
             new GUI(n);
         }
