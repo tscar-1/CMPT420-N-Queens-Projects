@@ -1,0 +1,361 @@
+package nqueens;
+
+import java.util.Random;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+public class GUI extends JFrame implements ActionListener {
+    private int n;
+    private Random rand;
+    private boolean solved;
+
+    private JPanel boardPanel;
+    private JButton[][] tiles;
+    private boolean[][] queens;
+
+    private JPanel buttonsPanel;
+    private JButton backtrackingButton;
+    private JButton hillclimbingButton;
+    private JButton resetButton;
+
+    private JTextArea outputArea;
+
+    public GUI(int n) {
+        // GUI is split into 3 sections
+        // boardPanel contains the NQueens board
+        // buttonPanel contains the Backtracking, Hillclimbing, and Reset buttons
+        // outputArea contains the text outputted by either algorithm
+        
+        this.n = n;
+        solved = false;
+        rand = new Random();
+
+        // Basic construction of the GUI window
+        setTitle("NQueens"); // Title of the program
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Makes the program stop running when the window is closed. It would continue to run within NetBeans otherwise
+        setSize(800, 600); // Width/Height of the window
+        setLayout(new BorderLayout()); // Lets us layout the different panels of the GUI into different parts of the window
+        
+        /////////////BOARD PANEL/////////////////
+        // Creates the boardPanel area of the GUI
+        /////////////BOARD PANEL/////////////////
+        
+        boardPanel = new JPanel(new GridLayout(n, n)); // Constructs a new panel with a grid layout
+        tiles = new JButton[n][n];
+        queens = new boolean[n][n];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                tiles[i][j] = new JButton();
+                tiles[i][j].setOpaque(true);
+                tiles[i][j].setPreferredSize(new Dimension(50, 50)); // Sets the size of the board's tiles
+                boardPanel.add(tiles[i][j]);
+            }
+        }
+        boardPanel.setPreferredSize(new Dimension(500, 500));
+        boardPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        add(boardPanel, BorderLayout.WEST);
+        
+        /////////////BUTTON PANEL//////////////
+        // Creates the buttons panel of the GUI
+        /////////////BUTTON PANEL//////////////
+        
+        buttonsPanel = new JPanel();
+        backtrackingButton = new JButton("Recursive Backtracking");
+        backtrackingButton.addActionListener(this);
+        hillclimbingButton = new JButton("Steepest Ascent Hillclimbing");
+        hillclimbingButton.addActionListener(this);
+        resetButton = new JButton("Reset");
+        resetButton.addActionListener(this);
+        buttonsPanel.add(backtrackingButton);
+        buttonsPanel.add(hillclimbingButton);
+        buttonsPanel.add(resetButton);
+        add(buttonsPanel, BorderLayout.SOUTH);
+        
+        /////////////OUTPUT AREA////////////
+        // Creates the outputArea of the GUI
+        /////////////OUTPUT AREA////////////
+        
+        outputArea = new JTextArea();
+        outputArea.setEditable(false); // Makes it so the outputArea cannot be editted
+        JScrollPane scrollPane = new JScrollPane(outputArea); // Makes the outputArea scrollable
+        add(scrollPane, BorderLayout.CENTER);
+
+        setVisible(true);
+    }
+
+        /////////////BackTracking////////////
+        //      BackTracking Algorithm     //
+        /////////////BackTracking////////////
+    
+    public void backtracking(int row, int[] count) {
+        if (row == n) {
+            // Returned if solution found
+            solved = true;
+            outputArea.append("Solved in: " + count[0] + " steps\n");
+            return;
+        }
+
+        for (int col = 0; col < n; col++) {
+            if (!backtrackingConflicts(row, col)) {
+                queens[row][col] = true; // Adds a queen to this position on the board if there are no conflicts
+                tiles[row][col].setBackground(Color.GREEN); // Sets the color of this position to green
+                outputArea.append("Placed queen at (" + row + ", " + col + ")\n"); // Adds this to the outputArea
+                count[0]++; // Increments steps taken
+                backtracking(row + 1, count); // Recursively calls the algo for the next row and updates the step count for the next recursion
+                if (solved) {
+                    return; // Breaks out of for loop when solution is found, else continues
+                }
+                queens[row][col] = false; // Removes a queen from this position if there are conflicts
+                tiles[row][col].setBackground(null); // Removes the color from this position
+                outputArea.append("Removed queen at (" + row + ", " + col + ")\n"); // Adds this to the outputArea
+                count[0]++; // Increments steps taken.
+            }
+        }
+    }
+
+    public boolean backtrackingConflicts(int row, int col) {
+        for (int i = 0; i < row; i++) {
+            int j = row - i;
+            // Returns a conflict if there is a queen in the same column
+            if (queens[i][col]) {
+                return true;
+            }
+            
+            //Returns a conflict if there is a queen to the left diagonally
+            if (col - j >= 0 && queens[i][col - j]) {
+                return true;
+            }
+            
+            //Returns a conflict if there is a queen to the right diagonally
+            if (col + j < n && queens[i][col + j]) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+
+        /////////////HillClimbing////////////
+        //      HillClimbing Algorithm     //
+        /////////////HillClimbing////////////
+    
+    private void hillclimbing() {
+        // Initialize the current state as a random arrangement of queens
+        for (int i = 0; i < n; i++) {
+            int j = rand.nextInt(n);
+            queens[i][j] = true;
+            tiles[i][j].setBackground(Color.BLACK);
+        }
+        boolean[][] currentBoard = queens;
+        boolean[][][] futureBoards = new boolean[n][n][n];
+        
+        //loop to copy the current board to the first element in the 3d array
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 0; j < n; j++)
+            {
+                futureBoards[0][i][j] = queens[i][j];
+            }
+        }
+        
+        //loop to create the other possible versions of the board to check for the best move (steepest ascent)
+        boolean[][] newBoard = new boolean[n][n];
+
+        for (int place = 0; place < n; place++)
+        {
+            for ( int i = 0; i < n; i++)
+            {
+                if (queens[place][i] == true)
+                {
+                    
+                        newBoard[0][i] = true;
+                        for (int a = place; a < n; a++)
+                        {
+                            for (int b = 0; b < n; b++)
+                            {
+                                newBoard[a][b] = queens[a][b];
+                            }
+                        }
+                    //loop to store each version of the board that is generated in futureBoards 3d array
+                    for (int c = 0; c < n; c++)
+                    {
+                        for (int d = 0; d < n; d++)
+                        {
+                            futureBoards[i][c][d] = newBoard[c][d];
+                        }
+                    }
+                }
+            }
+        
+        //get the current heuristic value based on the randomly generated initial state
+        int currentHeuristic = hillclimbingHeuristics(queens);
+        outputArea.append("current board heuristic = " + currentHeuristic + "\n");      
+        
+        //get the futureBoard index of the board that produces the highest heuristic score
+        int futureBoardIndex = futureBoardProcessing(futureBoards);
+        
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 0; j < n; j++)
+            {
+                queens[i][j] = futureBoards[futureBoardIndex][i][j];
+            }
+        }
+       
+        
+        
+        
+
+//        // Update the GUI and set the solved flag
+//        if (currentHeuristic == ((n-1)*n)/2) {
+//            outputArea.append("Solution found!\n");
+//            solved = true;
+//        } else {
+//            outputArea.append("No solution found, trying again.\n");
+//            reset();
+//            hillclimbing();
+//        }
+    }
+    }
+
+    //passing 3d futureBoards array to check heuristic of each and return the index of the board with the highest value
+    private int futureBoardProcessing(boolean[][][] board) {
+        int currentMaxIndice = 0;
+        int currentMaxScore = 0;
+         
+        for (int a = 0; a < n; a++)
+        {
+            int maxScore = ((n-1)*n)/2;
+            boolean[][] testBoard = new boolean[n][n];
+            for (int i = 0; i < n; i++)
+                for (int j = 0; j < n; j++)
+                {
+                    testBoard[i][j] = board[a][i][j];
+                }
+                 
+        
+            if (currentMaxScore < hillclimbingHeuristics(testBoard))
+            {
+                currentMaxScore = hillclimbingHeuristics(testBoard);
+                currentMaxIndice = a;
+            }
+        }
+        return currentMaxIndice;
+
+    }
+    
+    private int hillclimbingHeuristics(boolean[][] queens) {
+        int maxScore = ((n-1)*n)/2;
+        
+        // Check row conflicts
+            for (int i = 0; i < n; i++) {
+                boolean conflict = false;
+                for (int j = 0; j < n; j++) {
+                    if (queens[i][j]) {
+                        if (conflict) {
+                            maxScore--;
+                        }
+                        conflict = true;
+                    } else {
+                        conflict = false;
+                    }
+                }
+            }
+
+        // Check column conflicts
+            for (int j = 0; j < n; j++) {
+                boolean conflict = false;
+                for (int i = 0; i < n; i++) {
+                    if (queens[i][j]) {
+                        if (conflict) {
+                            maxScore--;
+                        }
+                        conflict = true;
+                    } else {
+                        conflict = false;
+                    }
+                }
+            }
+
+        // Check diagonal conflicts
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    if (queens[i][j]) {
+                        for (int k = 1; k < n; k++) {
+                            if (i - k >= 0 && j - k >= 0 && queens[i - k][j - k]) {
+                                maxScore--;
+                            }
+                            if (i - k >= 0 && j + k < n && queens[i - k][j + k]) {
+                                maxScore--;
+                            }
+                        }
+                    }
+                }
+            }
+        return maxScore;
+    }
+
+    public void reset(int n) {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                queens[i][j] = false;
+                tiles[i][j].setBackground(null);
+            }
+        }
+    }
+        
+
+    public void reset() {
+        // Not working, not used
+        tiles = new JButton[n][n];
+        queens = new boolean[n][n];
+        
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                tiles[i][j] = new JButton();
+                tiles[i][j].setOpaque(true);
+                tiles[i][j].setPreferredSize(new Dimension(50, 50));
+                boardPanel.add(tiles[i][j]);
+            }
+        }
+    }
+
+        /////////////Button Press////////////
+        //          Button Handling        //
+        /////////////Button Press////////////
+    
+    //Method to tell GUI what to do when a button is pressed
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        // Action for pressing the backtracking button
+        if (e.getSource() == backtrackingButton) {
+            //Places a starting queen in a random column of row 0
+            int startingQueen = rand.nextInt(n);
+            queens[0][startingQueen] = true;
+            outputArea.append("Placed queen at (" + "0" + ", " + startingQueen + ")\n");
+            tiles[0][startingQueen].setBackground(Color.RED);
+            
+            int[] count = new int[1]; // Initialization for the amount of steps taken during one run of the backtracking algo
+            long start = System.currentTimeMillis(); // Gets the current time before the backtracking algo starts
+            backtracking(1, count);
+            long end = System.currentTimeMillis(); // Gets the current time after the backtracking algo stops
+            outputArea.append("Elapsed time: " + (end - start) + " ms\n");
+        }
+        
+        // Action for pressing the hillclimbing button
+        else if (e.getSource() == hillclimbingButton) {
+            long start = System.currentTimeMillis(); // Gets the current time before the hillclimbing algo starts
+            hillclimbing();
+            long end = System.currentTimeMillis(); // Gets the current time after the hillclimbing algo stops
+            outputArea.append("Elapsed time: " + (end - start) + " ms\n");
+        }
+        
+        // Action for pressing the reset button
+        else if (e.getSource() == resetButton) {
+            // Closes the current GUI window and regenerates a new one
+            dispose();
+            new GUI(n);
+        }
+    }
+}
