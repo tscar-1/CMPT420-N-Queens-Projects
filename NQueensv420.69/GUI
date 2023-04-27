@@ -79,7 +79,7 @@ public class GUI extends JFrame implements ActionListener {
         if(count[0] == 0) {
             int startingQueen = rand.nextInt(n);
             queens[0][startingQueen] = true;
-            tiles[0][startingQueen].setBackground(Color.RED);
+            tiles[0][startingQueen].setBackground(Color.BLACK);
             count[0]++;
             outputArea.append(count[0] + ". Placed starting queen at (" + 0 + ", " + startingQueen + ")\n");
         }
@@ -94,9 +94,9 @@ public class GUI extends JFrame implements ActionListener {
         for (int col = 0; col < n; col++) {
             if (!backtrackingConflicts(row, col)) {
                 queens[row][col] = true; // Adds a queen to this position on the board if there are no conflicts
-                tiles[row][col].setBackground(Color.GREEN); // Sets the color of this position to green
+                tiles[row][col].setBackground(Color.BLACK); // Sets the color of this position to green
                 count[0]++; // Increments steps taken
-                outputArea.append(count[0] + ". Placed queen at (" + row + ", " + col + ")\n"); // Adds this to the outputArea
+                outputArea.append(count[0] + ". Placed queen at (" + (row + 1) + ", " + (col + 1) + ")\n"); // Adds this to the outputArea
                 backtracking(row + 1, count); // Recursively calls the algo for the next row and updates the step count for the next recursion
                 if (solved) {
                     return; // Breaks out of for loop when solution is found, else continues
@@ -104,7 +104,7 @@ public class GUI extends JFrame implements ActionListener {
                 queens[row][col] = false; // Removes a queen from this position if there are conflicts
                 tiles[row][col].setBackground(null); // Removes the color from this position
                 count[0]++; // Increments steps taken.
-                outputArea.append(count[0] + ". Removed queen at (" + row + ", " + col + ")\n"); // Adds this to the outputArea
+                outputArea.append(count[0] + ". Removed queen at (" + (row + 1) + ", " + (col + 1) + ")\n"); // Adds this to the outputArea
             }
         }
     }
@@ -114,6 +114,10 @@ public class GUI extends JFrame implements ActionListener {
             int j = row - i;
             // Returns a conflict if there is a queen in the same column
             if (queens[i][col]) {
+                return true;
+            }
+            
+            if (queens[row][i]) {
                 return true;
             }
 
@@ -189,7 +193,7 @@ public class GUI extends JFrame implements ActionListener {
             solved = true;
         } else {
             outputArea.append("No solution found, trying again.\n");
-            reset();
+            reset(n);
             hillclimbing();
         }
     }
@@ -251,17 +255,11 @@ public class GUI extends JFrame implements ActionListener {
         return conflicts;
     }
 
-    public void reset() {
-        // Not working, not used
-        tiles = new JButton[n][n];
-        queens = new boolean[n][n];
-        
+    public void reset(int n) {
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
-                tiles[j][i] = new JButton();
-                tiles[j][i].setOpaque(true);
-                tiles[j][i].setPreferredSize(new Dimension(50, 50));
-                boardPanel.add(tiles[j][i]);
+                queens[i][j] = false;
+                tiles[i][j].setBackground(null);
             }
         }
     }
@@ -279,7 +277,7 @@ public class GUI extends JFrame implements ActionListener {
             
             int[] count = new int[1]; // Initialization for the amount of steps taken during one run of the backtracking algo
             long start = System.currentTimeMillis(); // Gets the current time before the backtracking algo starts
-            backtracking(1, count);
+            backtracking(0, count);
             long end = System.currentTimeMillis(); // Gets the current time after the backtracking algo stops
             outputArea.append("Elapsed time: " + (end - start) + " ms\n");
         }
@@ -295,8 +293,9 @@ public class GUI extends JFrame implements ActionListener {
         // Action for pressing the reset button
         else if (e.getSource() == resetButton) {
             // Closes the current GUI window and regenerates a new one
-            dispose();
-            new GUI(n);
+            //dispose();
+            //new GUI(n);
+            reset(n);
         }
     }
 }
