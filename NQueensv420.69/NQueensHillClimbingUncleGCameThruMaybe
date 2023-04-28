@@ -105,7 +105,9 @@ public class NQueens extends JFrame implements ActionListener {
         setVisible(true);
     }
 
-    public void backtracking(int row, int[] count) {
+    public void backtracking(int row, int col, int[] count) {
+        boolean foundSolution = false;
+        
         if (count[0] == 0) {
             int startingQueen = rand.nextInt(n);
             queens[0][startingQueen] = true;
@@ -127,8 +129,9 @@ public class NQueens extends JFrame implements ActionListener {
                 tiles[row][col].setBackground(Color.BLACK); // Sets the color of this position to green
                 count[0]++; // Increments steps taken
                 outputArea.append(count[0] + ". Placed queen at (" + (row + 1) + ", " + (col + 1) + ")\n"); // Adds this to the outputArea
-                backtracking(row + 1, count); // Recursively calls the algo for the next row and updates the step count for the next recursion
+                backtracking(row + 1, col, count); // Recursively calls the algo for the next row and updates the step count for the next recursion
                 if (solved) {
+                    foundSolution = true;
                     return; // Breaks out of for loop when solution is found, else continues
                 }
                 queens[row][col] = false; // Removes a queen from this position if there are conflicts
@@ -153,13 +156,13 @@ public class NQueens extends JFrame implements ActionListener {
             }
 
             // Returns a conflict if there is a queen to the left diagonally
-            int leftDiagonal = col - row;
+            int leftDiagonal = col - (row - i);
             if (leftDiagonal >= 0 && queens[i][leftDiagonal]) {
                 return true;
             }
 
             // Returns a conflict if there is a queen to the right diagonally
-            int rightDiagonal = col + row;
+            int rightDiagonal = col + (row - i);
             if (rightDiagonal < n && queens[i][rightDiagonal]) {
                 return true;
             }
