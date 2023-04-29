@@ -4,6 +4,7 @@ import java.util.Random;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 
 public class NQueens extends JFrame implements ActionListener {
     private int n;
@@ -18,6 +19,7 @@ public class NQueens extends JFrame implements ActionListener {
     private JPanel boardPanel;
     private JButton[][] tiles;
     private boolean[][] queens;
+    private ArrayList<boolean[][]> boards;
 
     private JPanel buttonsPanel;
     private JButton backtrackingButton;
@@ -170,6 +172,7 @@ public class NQueens extends JFrame implements ActionListener {
         int successes = 0;
         int failures = 0;
         solved = false;
+        boards = new ArrayList<>();
         
         for(int i = 0; i < 20; i++) {
             hillClimbingPlaceQueensRandomly();
@@ -198,7 +201,9 @@ public class NQueens extends JFrame implements ActionListener {
                 
                 if(minH >= h) {
                     //outputArea.append("Heuristic = " + h + "\n");
+                    boards.add(queens);
                     outputArea.append("Attempt #" + attempts[0] + ", failure\n");
+                    
                     attempts[0]++;
                     failures++;
                     break;
@@ -208,6 +213,7 @@ public class NQueens extends JFrame implements ActionListener {
                 h = minH;
                 
                 if(h == 0) {
+                    boards.add(queens);
                     //outputArea.append("Heuristic = " + h + "\n");
                     outputArea.append("Attempt #" + attempts[0] + ", success\n");
                     attempts[0]++;
@@ -217,12 +223,37 @@ public class NQueens extends JFrame implements ActionListener {
             }
         }
         
+        System.out.println(boards.size());
         outputArea.append("Successes: " + successes + "\nFailures: " + failures + "\n");
         double percentSuccess = (successes/20.0)*100;
         String percentSuccessStr = String.format("%.2f", percentSuccess);
         outputArea.append("Found a solution " + percentSuccessStr + "% of the time\n");
         solved = true;
     }
+    
+    /*public int hillclimbingConflicts(int row, int col) {
+        int heuristic = ((n-1)*n)/2;
+        
+        for(int i = 0; i < row; i++) {
+            // Returns a conflict if there is a queen in the same row or column
+            if(queens[row][i] || queens[i][col]) {
+                heuristic--;
+            }
+
+            // Returns a conflict if there is a queen to the left diagonally
+            int leftDiagonal = col - (row - i);
+            if(leftDiagonal >= 0 && queens[i][leftDiagonal]) {
+                heuristic--;
+            }
+
+            // Returns a conflict if there is a queen to the right diagonally
+            int rightDiagonal = col + (row - i);
+            if(rightDiagonal < n && queens[i][rightDiagonal]) {
+                heuristic--;
+            }
+        }
+        return heuristic;
+    }*/
 
     private int hillclimbingCalculateHeuristic() {
         int h = 0;
@@ -360,6 +391,9 @@ public class NQueens extends JFrame implements ActionListener {
             // Clears the outputArea
             outputArea.selectAll();
             outputArea.replaceSelection(null);
+            
+            // Clears the boards ArrayList
+            boards.remove(boards.size() - 1);
             
             // Resets solved boolean
             solved = false;
