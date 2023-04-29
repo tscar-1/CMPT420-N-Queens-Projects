@@ -4,6 +4,7 @@ import java.util.Random;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 
 public class NQueens extends JFrame implements ActionListener {
 
@@ -19,8 +20,11 @@ public class NQueens extends JFrame implements ActionListener {
     private JPanel boardPanel;
     private JButton[][] tiles;
     private boolean[][] queens;
+    private ArrayList<boolean[][]> boards;
 
     private JPanel buttonsPanel;
+    private JButton leftButton;
+    private JButton rightButton;
     private JButton backtrackingButton;
     private JButton hillclimbingButton;
     private JButton resetButton;
@@ -85,15 +89,21 @@ public class NQueens extends JFrame implements ActionListener {
 
         // Creates the buttons panel of the GUI
         buttonsPanel = new JPanel();
+        leftButton = new JButton("<");
+        leftButton.addActionListener(this);
+        rightButton = new JButton(">");
+        rightButton.addActionListener(this);
         backtrackingButton = new JButton("Recursive Backtracking");
         backtrackingButton.addActionListener(this);
         hillclimbingButton = new JButton("Steepest Ascent Hillclimbing");
         hillclimbingButton.addActionListener(this);
         resetButton = new JButton("Reset");
         resetButton.addActionListener(this);
+        buttonsPanel.add(leftButton);
         buttonsPanel.add(backtrackingButton);
         buttonsPanel.add(hillclimbingButton);
         buttonsPanel.add(resetButton);
+        buttonsPanel.add(rightButton);
         add(buttonsPanel, BorderLayout.SOUTH);
 
         // Creates the outputArea of the GUI
@@ -106,6 +116,8 @@ public class NQueens extends JFrame implements ActionListener {
     }
 
     public void backtracking(int row, int[] count) {
+        boards = new ArrayList<>();
+        
         // If this is the first step of the backtracking algorithm, a queen is randomly placed somewhere in the first column
         if(count[0] == 0) {
             int startingQueen = rand.nextInt(n - 1);
@@ -143,6 +155,8 @@ public class NQueens extends JFrame implements ActionListener {
                 outputArea.append(count[0] + ". Removed queen at (" + (row + 1) + ", " + (col + 1) + ")\n"); // Adds this to the outputArea
             }
         }
+        
+        boards.add(queens);
     }
 
     public boolean backtrackingConflicts(int row, int col) {
@@ -171,6 +185,7 @@ public class NQueens extends JFrame implements ActionListener {
         int successes = 0;
         int failures = 0;
         solved = false;
+        boards = new ArrayList<>();
         
         for (int i = 0; i < 20; i++) {
             hillClimbingPlaceQueensRandomly();
@@ -297,6 +312,24 @@ public class NQueens extends JFrame implements ActionListener {
             }
         }
         
+        else if(e.getSource() == leftButton) {
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    queens[j][i] = false;
+                    tiles[j][i].setBackground(null);
+                }
+            }
+        }
+        
+        else if(e.getSource() == rightButton) {
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    queens[j][i] = false;
+                    tiles[j][i].setBackground(null);
+                }
+            }
+        }
+        
         // Action for pressing the backtracking button
         else if (e.getSource() == backtrackingButton) {
             // Resets the board if a solution has been found and user selects an algorithm without hitting reset button
@@ -360,6 +393,15 @@ public class NQueens extends JFrame implements ActionListener {
             // Clears the outputArea
             outputArea.selectAll();
             outputArea.replaceSelection(null);
+            
+            // Clears the boards ArrayList
+            for(int i = 0; i < boards.size(); i++) {
+                boards.remove(i);
+            }
+            
+            // Resets left and right board traversal buttons
+            leftButton.setEnabled(false);
+            rightButton.setEnabled(false);
             
             // Resets solved boolean
             solved = false;
