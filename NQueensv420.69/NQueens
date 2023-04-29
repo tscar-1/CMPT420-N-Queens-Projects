@@ -10,7 +10,6 @@ public class NQueens extends JFrame implements ActionListener {
     private int n;
     private Random rand;
     private boolean solved;
-    private int startingQueen = -1;
 
     private JPanel inputPanel;
     private JLabel inputLabel;
@@ -109,7 +108,7 @@ public class NQueens extends JFrame implements ActionListener {
     public void backtracking(int row, int[] count) {
         // If this is the first step of the backtracking algorithm, a queen is randomly placed somewhere in the first column
         if(count[0] == 0) {
-            startingQueen = rand.nextInt(n - 1);
+            int startingQueen = rand.nextInt(n - 1);
             queens[0][startingQueen] = true;
             tiles[0][startingQueen].setBackground(Color.BLACK);
             count[0]++;
