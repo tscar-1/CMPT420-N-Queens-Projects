@@ -183,6 +183,7 @@ public class NQueens extends JFrame implements ActionListener {
     }
 
     public void hillclimbing(int[] attempts) {
+        long start = System.currentTimeMillis(); // Gets the current time before the hillclimbing algo starts
         boards = new ArrayList<>();
         
         int successes = 0;
@@ -238,12 +239,15 @@ public class NQueens extends JFrame implements ActionListener {
             }
         }
         
+        long end = System.currentTimeMillis(); // Gets the current time after the backtracking algo stops
         outputArea.append("Successes: " + successes + "\nFailures: " + failures + "\n");
         double percentSuccess = (successes/20.0)*100;
         String percentSuccessStr = String.format("%.2f", percentSuccess);
         outputArea.append("Found a solution " + percentSuccessStr + "% of the time\n");
-        outputArea.append("Heuristic " + hillclimbingCalculateHeuristic() + "\n");
+        outputArea.append("Elapsed time: " + (end - start) + " ms\n\n");
         boardsIndex = boards.size() - 1;
+        outputArea.append("Showing Attempt #" + (boardsIndex + 1) + "\n");
+        //outputArea.append("Heuristic " + hillclimbingCalculateHeuristic() + "\n");
         leftButton.setEnabled(true);
         solved = true;
     }
@@ -342,6 +346,7 @@ public class NQueens extends JFrame implements ActionListener {
                 rightButton.setEnabled(true);
             }
             
+            outputArea.append("Showing Attempt #" + (boardsIndex + 1) + "\n");
             System.out.println("Current boards index: " + boardsIndex);
         }
         
@@ -367,6 +372,7 @@ public class NQueens extends JFrame implements ActionListener {
                 leftButton.setEnabled(true);
             }
             
+            outputArea.append("Showing Attempt #" + (boardsIndex + 1) + "\n");
             System.out.println("Current boards index: " + boardsIndex);
         }
         
@@ -386,10 +392,7 @@ public class NQueens extends JFrame implements ActionListener {
             }
 
             int[] count = new int[1]; // Initialization for the amount of steps taken during one run of the backtracking algo
-            long start = System.currentTimeMillis(); // Gets the current time before the backtracking algo starts
             backtracking(0, count);
-            long end = System.currentTimeMillis(); // Gets the current time after the backtracking algo stops
-            outputArea.append("Elapsed time: " + (end - start) + " ms\n");
         }
         
         // Action for pressing the hillclimbing button
@@ -414,10 +417,7 @@ public class NQueens extends JFrame implements ActionListener {
 
             int[] attempts = new int[1];
             attempts[0]++;
-            long start = System.currentTimeMillis(); // Gets the current time before the hillclimbing algo starts
             hillclimbing(attempts);
-            long end = System.currentTimeMillis(); // Gets the current time after the hillclimbing algo stops
-            outputArea.append("Elapsed time: " + (end - start) + " ms\n");
             System.out.println("Current boards size: " + boards.size());
             System.out.println("Current boards index: " + boardsIndex);
         }
