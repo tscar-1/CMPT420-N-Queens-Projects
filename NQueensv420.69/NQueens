@@ -5,9 +5,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class NQueens extends JFrame implements ActionListener {
-
     private int n;
     private Random rand;
     private boolean solved;
@@ -32,13 +32,16 @@ public class NQueens extends JFrame implements ActionListener {
 
     private JTextArea outputArea;
 
-    //GUI Window for 'Enter N:'
+    // GUI Window for 'Enter N:'
     public NQueens() {
+        
+        // Basic construction of the 'Enter N' GUI window
         setTitle("NQueens");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(500, 100);
         setLayout(new BorderLayout());
-
+        
+        // Creates the inputPanel of the GUI
         inputPanel = new JPanel();
         inputLabel = new JLabel("Enter N: ");
         inputField = new JTextField(5);
@@ -55,11 +58,12 @@ public class NQueens extends JFrame implements ActionListener {
         setVisible(true);
     }
 
-    //Main GUI window
+    // Main GUI window
     public NQueens(int n) {
+        
         // GUI is split into 3 sections
         // boardPanel contains the NQueens board
-        // buttonPanel contains the Backtracking, Hillclimbing, and Reset buttons
+        // buttonPanel contains the Backtracking, Hillclimbing, Reset, and L/R traversal buttons
         // outputArea contains the text outputted by either algorithm
 
         this.n = n;
@@ -189,7 +193,6 @@ public class NQueens extends JFrame implements ActionListener {
         int successes = 0;
         int failures = 0;
         solved = false;
-        boards = new ArrayList<>();
         
         for (int i = 0; i < 20; i++) {
             hillClimbingPlaceQueensRandomly();
@@ -337,53 +340,65 @@ public class NQueens extends JFrame implements ActionListener {
         }
         
         else if(e.getSource() == leftButton) {
-
             boardsIndex--;
             boolean[][] currentBoard = boards.get(boardsIndex).clone();
             
             for(int i = 0; i < n; i++) {
                 for(int j = 0; j < n; j++) {
+														
                     if(currentBoard[j][i]) {
                         queens[j][i] = true;
+															   
                     }
                     else {
                         queens[j][i] = false;
                     }
                 }
             }
+            
             for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                if (queens[j][i]) {
-                    tiles[j][i].setBackground(Color.BLACK);
-                } else {
-                    tiles[j][i].setBackground(null);
+                for (int j = 0; j < n; j++) {
+                    if (queens[j][i]) {
+                        tiles[j][i].setBackground(Color.BLACK);
+                    } else {
+                        tiles[j][i].setBackground(null);
+                    }
                 }
             }
-        }
-            
+
             if(boardsIndex == 0) {
                 leftButton.setEnabled(false);
+            }
+            
+            if(boardsIndex > 0) {
                 rightButton.setEnabled(true);
             }
-            else if(boardsIndex > 20)
-                rightButton.setEnabled(true);
             
             outputArea.append("Showing Attempt #" + (boardsIndex + 1) + "\n");
-            System.out.println("Current boards index: " + boardsIndex);
         }
         
         else if(e.getSource() == rightButton) {
             boardsIndex++;
-            boolean[][] currentBoard = boards.get(boardsIndex);
+            boolean[][] currentBoard = boards.get(boardsIndex).clone();
             
             for(int i = 0; i < n; i++) {
                 for(int j = 0; j < n; j++) {
+														
                     if(currentBoard[j][i]) {
                         queens[j][i] = true;
-                        tiles[j][i].setBackground(Color.BLACK);
+															   
                     }
                     else {
                         queens[j][i] = false;
+                    }
+                }
+            }
+            
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    if (queens[j][i]) {
+                        tiles[j][i].setBackground(Color.BLACK);
+                    } else {
                         tiles[j][i].setBackground(null);
                     }
                 }
@@ -391,11 +406,13 @@ public class NQueens extends JFrame implements ActionListener {
             
             if(boardsIndex == boards.size() - 1) {
                 rightButton.setEnabled(false);
+            }
+            
+            if(boardsIndex >= 1) {
                 leftButton.setEnabled(true);
             }
             
             outputArea.append("Showing Attempt #" + (boardsIndex + 1) + "\n");
-            System.out.println("Current boards index: " + boardsIndex);
         }
         
         // Action for pressing the backtracking button
@@ -440,8 +457,6 @@ public class NQueens extends JFrame implements ActionListener {
             int[] attempts = new int[1];
             attempts[0]++;
             hillclimbing(attempts);
-            System.out.println("Current boards size: " + boards.size());
-            System.out.println("Current boards index: " + boardsIndex);
         }
         
         // Action for pressing the reset button
