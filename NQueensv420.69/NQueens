@@ -6,7 +6,6 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class NQueens extends JFrame implements ActionListener {
-
     private int n;
     private Random rand;
     private boolean solved;
@@ -126,15 +125,15 @@ public class NQueens extends JFrame implements ActionListener {
         // Checks for conflicts with the current queen assignments. If no conflicts, places a queen
         // then recursively calls the backtracking method for the next row. If it is not the first step
         // of the algorithm or no solution has been found, the method picks back up here.
-        for (int col = 0; col < n; col++) {
+        for(int col = 0; col < n; col++) {
             // Calls the backtrackingConflicts method to check for conflicts
-            if (!backtrackingConflicts(row, col)) {
+            if(!backtrackingConflicts(row, col)) {
                 queens[row][col] = true; // Adds a queen to this position on the board
                 tiles[row][col].setBackground(Color.BLACK); // Sets the color of this position
                 count[0]++; // Increments steps taken
                 outputArea.append(count[0] + ". Placed queen at (" + (row + 1) + ", " + (col + 1) + ")\n"); // Adds this to the outputArea
                 backtracking(row + 1, count); // Recursively calls the algo for the next row and updates the step count for the next recursion
-                if (solved) {
+                if(solved) {
                     return; // Breaks out of for loop when solution is found, else continues
                 }
                 queens[row][col] = false; // Removes a queen from this position if there are conflicts
@@ -146,21 +145,21 @@ public class NQueens extends JFrame implements ActionListener {
     }
 
     public boolean backtrackingConflicts(int row, int col) {
-        for (int i = 0; i < row; i++) {
+        for(int i = 0; i < row; i++) {
             // Returns a conflict if there is a queen in the same row or column
-            if (queens[row][i] || queens[i][col]) {
+            if(queens[row][i] || queens[i][col]) {
                 return true;
             }
 
             // Returns a conflict if there is a queen to the left diagonally
             int leftDiagonal = col - (row - i);
-            if (leftDiagonal >= 0 && queens[i][leftDiagonal]) {
+            if(leftDiagonal >= 0 && queens[i][leftDiagonal]) {
                 return true;
             }
 
             // Returns a conflict if there is a queen to the right diagonally
             int rightDiagonal = col + (row - i);
-            if (rightDiagonal < n && queens[i][rightDiagonal]) {
+            if(rightDiagonal < n && queens[i][rightDiagonal]) {
                 return true;
             }
         }
@@ -172,23 +171,23 @@ public class NQueens extends JFrame implements ActionListener {
         int failures = 0;
         solved = false;
         
-        for (int i = 0; i < 20; i++) {
+        for(int i = 0; i < 20; i++) {
             hillClimbingPlaceQueensRandomly();
             int h = hillclimbingCalculateHeuristic();
             
-            while (h > 0) {
+            while(h > 0) {
                 int minH = Integer.MAX_VALUE;
                 int[] move = null;
                 
-                for (int j = 0; j < n; j++) {
+                for(int j = 0; j < n; j++) {
                     int currentRow = hillclimbingGetQueenRow(j);
                     
-                    for (int k = 0; k < n; k++) {
-                        if (k != currentRow) {
+                    for(int k = 0; k < n; k++) {
+                        if(k != currentRow) {
                             hillclimbingMoveQueen(j, k);
                             int newH = hillclimbingCalculateHeuristic();
                             
-                            if (newH < minH) {
+                            if(newH < minH) {
                                 minH = newH;
                                 move = new int[]{j, k};
                             }
@@ -197,7 +196,7 @@ public class NQueens extends JFrame implements ActionListener {
                     }
                 }
                 
-                if (minH >= h) {
+                if(minH >= h) {
                     //outputArea.append("Heuristic = " + h + "\n");
                     outputArea.append("Attempt #" + attempts[0] + ", failure\n");
                     attempts[0]++;
@@ -208,7 +207,7 @@ public class NQueens extends JFrame implements ActionListener {
                 hillclimbingMoveQueen(move[0], move[1]);
                 h = minH;
                 
-                if (h == 0) {
+                if(h == 0) {
                     //outputArea.append("Heuristic = " + h + "\n");
                     outputArea.append("Attempt #" + attempts[0] + ", success\n");
                     attempts[0]++;
@@ -227,11 +226,12 @@ public class NQueens extends JFrame implements ActionListener {
 
     private int hillclimbingCalculateHeuristic() {
         int h = 0;
-        for (int i = 0; i < n; i++) {
+        
+        for(int i = 0; i < n; i++) {
             int row = hillclimbingGetQueenRow(i);
-            for (int j = i + 1; j < n; j++) {
+            for(int j = i + 1; j < n; j++) {
                 int otherRow = hillclimbingGetQueenRow(j);
-                if (row == otherRow || Math.abs(row - otherRow) == Math.abs(i - j)) {
+                if(row == otherRow || Math.abs(row - otherRow) == Math.abs(i - j)) {
                     h++;
                 }
             }
@@ -240,14 +240,14 @@ public class NQueens extends JFrame implements ActionListener {
     }
 
     private void hillClimbingPlaceQueensRandomly() {
-        for (int i = 0; i < n; i++) {
+        for(int i = 0; i < n; i++) {
             int row = (int) (Math.random() * n);
             hillclimbingMoveQueen(i, row);
         }
     }
 
     private int hillclimbingGetQueenRow(int column) {
-        for (int i = 0; i < n; i++) {
+        for(int i = 0; i < n; i++) {
             if (queens[column][i]) {
                 return i;
             }
@@ -257,7 +257,7 @@ public class NQueens extends JFrame implements ActionListener {
 
     private void hillclimbingMoveQueen(int column, int row) {
         int currentRow = hillclimbingGetQueenRow(column);
-        if (currentRow != -1) {
+        if(currentRow != -1) {
             queens[column][currentRow] = false;
         }
         queens[column][row] = true;
@@ -265,11 +265,12 @@ public class NQueens extends JFrame implements ActionListener {
     }
 
     private void hillclimbingUpdateBoard() {
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                if (queens[j][i]) {
+        for(int i = 0; i < n; i++) {
+            for(int j = 0; j < n; j++) {
+                if(queens[j][i]) {
                     tiles[j][i].setBackground(Color.BLACK);
-                } else {
+                } 
+                else {
                     tiles[j][i].setBackground(null);
                 }
             }
@@ -279,13 +280,14 @@ public class NQueens extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         //Action for pressing the enter button on the 'Enter N' GUI
-        if (e.getSource() == createBoardButton) {
+        if(e.getSource() == createBoardButton) {
             try {
                 int n = Integer.parseInt(inputField.getText());
                 if (n >= 4) {
                     dispose();
                     NQueens nQueens = new NQueens(n);
-                } else {
+                } 
+                else {
                     JOptionPane.showMessageDialog(null, "Invalid input.");
                     return;
                 }
@@ -296,10 +298,10 @@ public class NQueens extends JFrame implements ActionListener {
         }
         
         // Action for pressing the backtracking button
-        else if (e.getSource() == backtrackingButton) {
+        else if(e.getSource() == backtrackingButton) {
             // Resets the board if a solution has been found and user selects an algorithm without hitting reset button
-            if (solved) {
-                for (int i = 0; i < n; i++) {
+            if(solved) {
+                for(int i = 0; i < n; i++) {
                     for (int j = 0; j < n; j++) {
                         queens[j][i] = false;
                         tiles[j][i].setBackground(null);
@@ -318,12 +320,12 @@ public class NQueens extends JFrame implements ActionListener {
         }
         
         // Action for pressing the hillclimbing button
-        else if (e.getSource() == hillclimbingButton) {
+        else if(e.getSource() == hillclimbingButton) {
             // Resets the board if a solution has been found and user selects an algorithm without 
             // hitting reset button
-            if (solved) {
-                for (int i = 0; i < n; i++) {
-                    for (int j = 0; j < n; j++) {
+            if(solved) {
+                for(int i = 0; i < n; i++) {
+                    for(int j = 0; j < n; j++) {
                         queens[j][i] = false;
                         tiles[j][i].setBackground(null);
                     }
@@ -346,10 +348,10 @@ public class NQueens extends JFrame implements ActionListener {
         }
         
         // Action for pressing the reset button
-        else if (e.getSource() == resetButton) {
+        else if(e.getSource() == resetButton) {
             // Removes all queen positions and tile colors
-            for (int i = 0; i < n; i++) {
-                for (int j = 0; j < n; j++) {
+            for(int i = 0; i < n; i++) {
+                for(int j = 0; j < n; j++) {
                     queens[j][i] = false;
                     tiles[j][i].setBackground(null);
                 }
