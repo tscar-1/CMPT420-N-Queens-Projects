@@ -204,9 +204,14 @@ public class NQueens extends JFrame implements ActionListener {
 
     // Steepest Ascent Hillclimbing algorithm //
     public void hillclimbing(int[] attempts) {
+        
+        // Records starting time for the SAHC algo in order to display elapsed time.
         long start = System.currentTimeMillis();
+        
+        // Initializes the boards ArrayList which stores board solutions
         boards = new ArrayList<>();
 
+        // Initialization of variables used to track statistics
         int successes = 0;
         int failures = 0;
         int failuresPlateau = 0;
@@ -214,19 +219,33 @@ public class NQueens extends JFrame implements ActionListener {
         int failuresLocalMaxima = 0;
         int plateauCount = 0;
         int ridgeCount = 0;
+        
         solved = false;
 
+        // Runs the SAHC 20 times
         for (int i = 0; i < 20; i++) {
+            
+            // Randomly places queens on the board and then calculates the heuristic of that board.
             hillClimbingPlaceQueensRandomly();
             int h = hillclimbingCalculateHeuristic();
 
+            // While loop runs when there are conflicting queens present on the board.
             while (h > 0) {
+                
+                // Initialization of minimum heuristic and move values.
                 int minH = Integer.MAX_VALUE;
                 int[] move = null;
 
+                // Traverses each column of the board.
                 for (int j = 0; j < n; j++) {
+                    
+                    // Sets the current row to the row of the found queen within the specified column.
                     int currentRow = hillclimbingGetQueenRow(j);
 
+                    // Traverses each row of the board. If a queen is not already in this row, it moves the queen to it
+                    // then calculates the new heuristic for the new configuration of the board. If the new heuristic is less than
+                    // the current minimum heuristic, the minimum heuristic is updated with this new value. Next, the queen is moved
+                    // back to it's original row.
                     for (int k = 0; k < n; k++) {
                         if (k != currentRow) {
                             hillclimbingMoveQueen(j, k);
@@ -241,16 +260,22 @@ public class NQueens extends JFrame implements ActionListener {
                     }
                 }
 
+                // Increments plateauCount if the current heuristic is equal to the minimum heuristic.
                 if (h == minH) {
                     plateauCount++;
                 }
 
+                // Increments the ridgeCount if the current heuristic is greater than the minimum heuristic.
                 if (h > minH) {
                     ridgeCount++;
                 }
                 
+                // If the minimum heuristic is >= the current heuristic, returns a failure.
+                // Types of failure are differentiated and their counts are incremented accordingly.
+                // Heuristic and failure statistics are displayed in the outputArea panel and
+                // the failed solution is added to the boards array for future comparison,
+                // while attempts and failure values are incremented.
                 if (minH >= h) {
-                    //outputArea.append("Heuristic = " + h + "\n");
                     outputArea.append("Attempt #" + attempts[0] + ", failure\n");
                     if (plateauCount == n) {
                         outputArea.append("  Failure due to: plateau\n");
@@ -279,9 +304,14 @@ public class NQueens extends JFrame implements ActionListener {
                     break;
                 }
 
+                // Moves the queen the minimum heuristic is not less than the minimum heuristic,
+                // then updates the current heuristic with the minimum heuristic.
                 hillclimbingMoveQueen(move[0], move[1]);
                 h = minH;
 
+                // If the heuristic is 0, returns a success. The attempt # and heuristic are displayed
+                // in the outputArea and successful solution is added to the boards array for future comparison,
+                // while attempts and success values are incremented.
                 if (h == 0) {
                     outputArea.append("Attempt #" + attempts[0] + ", success\n");
                     outputArea.append("  Heuristic: " + hillclimbingCalculateHeuristic() + "\n");
@@ -312,16 +342,23 @@ public class NQueens extends JFrame implements ActionListener {
         long end = System.currentTimeMillis(); // Gets the current time after the backtracking algo stops
         outputArea.append("Elapsed time: " + (end - start) + " ms\n\n");
 
+        // Displays this in the outputArea to let user know that they are viewing the last generated board.
         boardsIndex = boards.size() - 1;
         outputArea.append("Showing Attempt #" + (boardsIndex + 1) + "\n");
 
+        // Enables the '<' button since we are starting at the upper limit of the boards array.
         leftButton.setEnabled(true);
+        
         solved = true;
     }
 
     // Calculates heuristics within the SAHC algo //
     private int hillclimbingCalculateHeuristic() {
         int h = 0;
+        
+        // Traverses the board's columns, finds the row of the queen in that column, then
+        // loops through the remaining columns to see if there are any queens attacking it.
+        // If an attacking queen is found, the heuristic is incremented.
         for (int i = 0; i < n; i++) {
             int row = hillclimbingGetQueenRow(i);
             for (int j = i + 1; j < n; j++) {
@@ -336,6 +373,8 @@ public class NQueens extends JFrame implements ActionListener {
 
     // Generates a board with random placement of n queens within the SAHC algo //
     private void hillClimbingPlaceQueensRandomly() {
+        
+        // Traverses the board's columns and assigns a queen to a random row of that column.
         for (int i = 0; i < n; i++) {
             int row = (int) (Math.random() * n);
             hillclimbingMoveQueen(i, row);
@@ -344,6 +383,8 @@ public class NQueens extends JFrame implements ActionListener {
 
     // Gets the row of a specified queen within the SAHC algo //
     private int hillclimbingGetQueenRow(int column) {
+        
+        // Traverses the board's rows and returns the row if a queen is found.
         for (int i = 0; i < n; i++) {
             if (queens[column][i]) {
                 return i;
@@ -354,6 +395,9 @@ public class NQueens extends JFrame implements ActionListener {
 
     // Moves a specified queen within the SAHC algo //
     private void hillclimbingMoveQueen(int column, int row) {
+        
+        // Finds the current row of the queen, removes it, then adds it
+        // into the new row. The board is then updated.
         int currentRow = hillclimbingGetQueenRow(column);
         if (currentRow != -1) {
             queens[column][currentRow] = false;
@@ -364,6 +408,9 @@ public class NQueens extends JFrame implements ActionListener {
 
     // Updates the board within the SAHC algo //
     private void hillclimbingUpdateBoard() {
+        
+        // Traverses the board to find new queen positions and then colors their corresponding
+        // tile positions.
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 if (queens[j][i]) {
