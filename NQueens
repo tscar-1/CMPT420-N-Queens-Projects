@@ -1,9 +1,11 @@
-// Gary LaPicola, Louis Celiberti, Thomas Scardino
-// Dr. AbuMallouh
-// CMPT 420 Artificial Intelligence
-// Project 3 Steepest Ascent Hillclimbing
-// &
-// Project 6 Recursive Backtracking
+/////////////////////////////////////////////////////
+// Gary LaPicola, Louis Celiberti, Thomas Scardino //
+// Dr. AbuMallouh                                  //
+// CMPT 420 Artificial Intelligence                //
+// Project 3 Steepest Ascent Hillclimbing          //
+// &                                               //
+// Project 6 Recursive Backtracking                //
+/////////////////////////////////////////////////////
 
 package nqueens;
 
