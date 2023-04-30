@@ -1,3 +1,10 @@
+// Gary LaPicola, Louis Celiberti, Thomas Scardino
+// Dr. AbuMallouh
+// CMPT 420 Artificial Intelligence
+// Project 3 Steepest Ascent Hillclimbing
+// &
+// Project 6 Recursive Backtracking
+
 package nqueens;
 
 import java.util.Random;
@@ -7,6 +14,7 @@ import java.awt.event.*;
 import java.util.ArrayList;
 
 public class NQueens extends JFrame implements ActionListener {
+
     private int n;
     private Random rand;
     private boolean solved;
@@ -31,23 +39,24 @@ public class NQueens extends JFrame implements ActionListener {
 
     private JTextArea outputArea;
 
-    // GUI Window for 'Enter N:'
+    // GUI Window for 'Enter N:' //
     public NQueens() {
-        
+
         // Basic construction of the 'Enter N' GUI window
-        setTitle("NQueens");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        // Sets the window title, size, and makes it end the program within NetBeans when the window is closed
+        setTitle("NQueens"); // Window title
         setSize(500, 100);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
-        
+
         // Creates the inputPanel of the GUI
+        // Adds a label & text field for the user to enter N and an enter button to proceed to the next GUI window
         inputPanel = new JPanel();
         inputLabel = new JLabel("Enter N: ");
         inputField = new JTextField(5);
         inputField.addActionListener(this);
         createBoardButton = new JButton("Enter");
         createBoardButton.addActionListener(this);
-
         inputPanel.add(inputLabel);
         inputPanel.add(inputField);
         inputPanel.add(createBoardButton);
@@ -57,42 +66,50 @@ public class NQueens extends JFrame implements ActionListener {
         setVisible(true);
     }
 
-    // Main GUI window
+    // Main GUI window //
     public NQueens(int n) {
-        
+
         // GUI is split into 3 sections
         // boardPanel contains the NQueens board
         // buttonPanel contains the Backtracking, Hillclimbing, Reset, and L/R traversal buttons
         // outputArea contains the text outputted by either algorithm
-
         this.n = n;
         solved = false;
         rand = new Random();
 
-        // Basic construction of the GUI window
-        setTitle("NQueens"); // Title of the program
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Makes the program stop running when the window is closed. It would continue to run within NetBeans otherwise
-        setSize(800, 600); // Width/Height of the window
-        setLayout(new BorderLayout()); // Lets us layout the different panels of the GUI into different parts of the window
+        // Basic construction of the GUI window //
+        // Sets the window title, size, and makes it end the program within NetBeans when the window is closed
+        setTitle("NQueens");
+        setSize(800, 600);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
 
-        // Creates the boardPanel area of the GUI
-        boardPanel = new JPanel(new GridLayout(n, n)); // Constructs a new panel with a grid layout
+        // Creates the boardPanel area of the GUI //
+        // Makes the boardpanel into a grid of n x n tiles.
+        // The tiles themselves are buttons that have no function for the user, but allows us to fill them with color
+        // as a representation for when a queen is placed there.
+        // Queens are handled as booleans, with a 'true' value meaning a queen is present and vice versa.
+        boardPanel = new JPanel(new GridLayout(n, n));
         tiles = new JButton[n][n];
         queens = new boolean[n][n];
         boardsIndex = -1;
+        // For loop that populates the GridLayout with n x n tile buttons.
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 tiles[j][i] = new JButton();
                 tiles[j][i].setOpaque(true);
-                tiles[j][i].setPreferredSize(new Dimension(50, 50)); // Sets the size of the board's tiles
+                tiles[j][i].setPreferredSize(new Dimension(75, 75));
                 boardPanel.add(tiles[j][i]);
             }
         }
-        boardPanel.setPreferredSize(new Dimension(500, 500)); // Sets dimension of the board panel
-        boardPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK)); // Adds a border to the board panel
-        add(boardPanel, BorderLayout.WEST); // Orients the board to the left side of the window
+        // Sets the boardPanel default size within the GUI, adds a border to the panel, and orients it to the left side of the window.
+        boardPanel.setPreferredSize(new Dimension(500, 500));
+        boardPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        add(boardPanel, BorderLayout.WEST);
 
-        // Creates the buttons panel of the GUI
+        // Creates the buttons panel of the GUI //
+        // Straightforward. Adds buttons for the user to select algorithms, reset the board to the default state,
+        // and traversal buttons so that the user can view the solutions generated as part of the hillclimbing algorithm
         buttonsPanel = new JPanel();
         leftButton = new JButton("<");
         leftButton.addActionListener(this);
@@ -113,18 +130,22 @@ public class NQueens extends JFrame implements ActionListener {
         buttonsPanel.add(rightButton);
         add(buttonsPanel, BorderLayout.SOUTH);
 
-        // Creates the outputArea of the GUI
+        // Creates the outputArea of the GUI //
+        // Makes it so the outputArea is not able to be altered by the user, makes it scrollable, and orients it in relation to the other panels.
         outputArea = new JTextArea();
-        outputArea.setEditable(false); // Makes it so the outputArea cannot be editted
-        JScrollPane scrollPane = new JScrollPane(outputArea); // Makes the outputArea scrollable
+        outputArea.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(outputArea);
         add(scrollPane, BorderLayout.CENTER);
 
         setVisible(true);
     }
 
+    // Recursive Backtracking algorithm //
     public void backtracking(int row, int[] count) {
-        // If this is the first step of the backtracking algorithm, a queen is randomly placed somewhere in the first column
-        if(count[0] == 0) {
+
+        // If this is the first step of the backtracking algorithm, a queen is randomly placed somewhere in the first column,
+        // the steps counter is incremented, and an output tells the user where the starting queen has been placed.
+        if (count[0] == 0) {
             int startingQueen = rand.nextInt(n - 1);
             queens[0][startingQueen] = true;
             tiles[0][startingQueen].setBackground(Color.BLACK);
@@ -133,50 +154,53 @@ public class NQueens extends JFrame implements ActionListener {
         }
 
         // If the algorithm has reached the last row, returns true and prints out the number of steps required to reach a solution.
-        if(row == n) {
-            // Returned if solution found
+        // Since recursive backtracking is a complete algorithm, once it reaches the last row the problem will always return as solved.
+        if (row == n) {
             solved = true;
-            outputArea.append("Solved in: " + count[0] + " steps\n"); 
+            outputArea.append("Solved in: " + count[0] + " steps\n");
             return;
         }
 
         // Checks for conflicts with the current queen assignments. If no conflicts, places a queen
         // then recursively calls the backtracking method for the next row. If it is not the first step
-        // of the algorithm or no solution has been found, the method picks back up here.
+        // of the algorithm or no solution has been found, the method picks back up here. If a solution has
+        // not been found, the queen from the respective location is removed.
+        // Additionally, every time a queen placement is changed, count is incremented in order to display the number
+        // of steps taken that were needed to solve the board.
         for (int col = 0; col < n; col++) {
-            // Calls the backtrackingConflicts method to check for conflicts
             if (!backtrackingConflicts(row, col)) {
-                queens[row][col] = true; // Adds a queen to this position on the board
-                tiles[row][col].setBackground(Color.BLACK); // Sets the color of this position
-                count[0]++; // Increments steps taken
-                outputArea.append(count[0] + ". Placed queen at (" + (row + 1) + ", " + (col + 1) + ")\n"); // Adds this to the outputArea
-                backtracking(row + 1, count); // Recursively calls the algo for the next row and updates the step count for the next recursion
+                queens[row][col] = true;
+                tiles[row][col].setBackground(Color.BLACK);
+                count[0]++;
+                outputArea.append(count[0] + ". Placed queen at (" + (row + 1) + ", " + (col + 1) + ")\n");
+                backtracking(row + 1, count);
                 if (solved) {
-                    return; // Breaks out of for loop when solution is found, else continues
+                    return;
                 }
-                queens[row][col] = false; // Removes a queen from this position if there are conflicts
-                tiles[row][col].setBackground(null); // Removes the color from this position
-                count[0]++; // Increments steps taken.
-                outputArea.append(count[0] + ". Removed queen at (" + (row + 1) + ", " + (col + 1) + ")\n"); // Adds this to the outputArea
+                queens[row][col] = false;
+                tiles[row][col].setBackground(null);
+                count[0]++;
+                outputArea.append(count[0] + ". Removed queen at (" + (row + 1) + ", " + (col + 1) + ")\n");
             }
         }
-        
+
     }
 
+    // Checks for conflicts within the Recursive Backtracking algorithm //
     public boolean backtrackingConflicts(int row, int col) {
+
+        // Returns true if there is a horizontal, vertical, or diagonal conflict by two queens. Returns false
+        // if there are no conflicts.
         for (int i = 0; i < row; i++) {
-            // Returns a conflict if there is a queen in the same row or column
             if (queens[row][i] || queens[i][col]) {
                 return true;
             }
 
-            // Returns a conflict if there is a queen to the left diagonally
             int leftDiagonal = col - (row - i);
             if (leftDiagonal >= 0 && queens[i][leftDiagonal]) {
                 return true;
             }
 
-            // Returns a conflict if there is a queen to the right diagonally
             int rightDiagonal = col + (row - i);
             if (rightDiagonal < n && queens[i][rightDiagonal]) {
                 return true;
@@ -185,30 +209,55 @@ public class NQueens extends JFrame implements ActionListener {
         return false;
     }
 
+    // Steepest Ascent Hillclimbing algorithm //
     public void hillclimbing(int[] attempts) {
-        long start = System.currentTimeMillis(); // Gets the current time before the hillclimbing algo starts
-        boards = new ArrayList<>();
         
+        // Records starting time for the SAHC algo in order to display elapsed time.
+        long start = System.currentTimeMillis();
+        
+        // Initializes the boards ArrayList which stores board solutions
+        boards = new ArrayList<>();
+
+        // Initialization of variables used to track statistics
         int successes = 0;
         int failures = 0;
-        solved = false;
+        int failuresPlateau = 0;
+        int failuresRidge = 0;
+        int failuresLocalMaxima = 0;
+        int plateauCount = 0;
+        int ridgeCount = 0;
         
+        solved = false;
+
+        // Runs the SAHC 20 times
         for (int i = 0; i < 20; i++) {
+            
+            // Randomly places queens on the board and then calculates the heuristic of that board.
             hillClimbingPlaceQueensRandomly();
             int h = hillclimbingCalculateHeuristic();
-            
+
+            // While loop runs when there are conflicting queens present on the board.
             while (h > 0) {
+                
+                // Initialization of minimum heuristic and move values.
                 int minH = Integer.MAX_VALUE;
                 int[] move = null;
-                
+
+                // Traverses each column of the board.
                 for (int j = 0; j < n; j++) {
-                    int currentRow = hillclimbingGetQueenRow(j);
                     
+                    // Sets the current row to the row of the found queen within the specified column.
+                    int currentRow = hillclimbingGetQueenRow(j);
+
+                    // Traverses each row of the board. If a queen is not already in this row, it moves the queen to it
+                    // then calculates the new heuristic for the new configuration of the board. If the new heuristic is less than
+                    // the current minimum heuristic, the minimum heuristic is updated with this new value. Next, the queen is moved
+                    // back to it's original row.
                     for (int k = 0; k < n; k++) {
                         if (k != currentRow) {
                             hillclimbingMoveQueen(j, k);
                             int newH = hillclimbingCalculateHeuristic();
-                            
+
                             if (newH < minH) {
                                 minH = newH;
                                 move = new int[]{j, k};
@@ -217,34 +266,68 @@ public class NQueens extends JFrame implements ActionListener {
                         }
                     }
                 }
+
+                // Increments plateauCount if the current heuristic is equal to the minimum heuristic.
+                if (h == minH) {
+                    plateauCount++;
+                }
+
+                // Increments the ridgeCount if the current heuristic is greater than the minimum heuristic.
+                if (h > minH) {
+                    ridgeCount++;
+                }
                 
+                // If the minimum heuristic is >= the current heuristic, returns a failure.
+                // Types of failure are differentiated and their counts are incremented accordingly.
+                // Heuristic and failure statistics are displayed in the outputArea panel and
+                // the failed solution is added to the boards array for future comparison,
+                // while attempts and failure values are incremented.
                 if (minH >= h) {
-                    //outputArea.append("Heuristic = " + h + "\n");
                     outputArea.append("Attempt #" + attempts[0] + ", failure\n");
+                    if (plateauCount == n) {
+                        outputArea.append("  Failure due to: plateau\n");
+                        failuresPlateau++;
+                        plateauCount = 0;
+                    } 
+                    else if (ridgeCount == n) {
+                        outputArea.append("  Failure due to: ridge\n");
+                        failuresRidge++;
+                        ridgeCount = 0;
+                    } 
+                    else {
+                        outputArea.append("  Failure due to: local maxima\n");
+                        failuresLocalMaxima++;
+                    }
+                    outputArea.append("  Heuristic: " + hillclimbingCalculateHeuristic() + "\n");
                     boolean[][] newBoard = new boolean[n][n];
-                    for (int a = 0; a < n; a++)
-                        for (int b = 0; b < n; b++)
-                        {
+                    for (int a = 0; a < n; a++) {
+                        for (int b = 0; b < n; b++) {
                             newBoard[b][a] = queens[b][a];
                         }
+                    }
                     boards.add(newBoard);
                     attempts[0]++;
                     failures++;
                     break;
                 }
-                
+
+                // Moves the queen the minimum heuristic is not less than the minimum heuristic,
+                // then updates the current heuristic with the minimum heuristic.
                 hillclimbingMoveQueen(move[0], move[1]);
                 h = minH;
-                
+
+                // If the heuristic is 0, returns a success. The attempt # and heuristic are displayed
+                // in the outputArea and successful solution is added to the boards array for future comparison,
+                // while attempts and success values are incremented.
                 if (h == 0) {
-                    //outputArea.append("Heuristic = " + h + "\n");
                     outputArea.append("Attempt #" + attempts[0] + ", success\n");
+                    outputArea.append("  Heuristic: " + hillclimbingCalculateHeuristic() + "\n");
                     boolean[][] newBoard = new boolean[n][n];
-                    for (int a = 0; a < n; a++)
-                        for (int b = 0; b < n; b++)
-                        {
+                    for (int a = 0; a < n; a++) {
+                        for (int b = 0; b < n; b++) {
                             newBoard[b][a] = queens[b][a];
                         }
+                    }
                     boards.add(newBoard);
                     attempts[0]++;
                     successes++;
@@ -252,22 +335,37 @@ public class NQueens extends JFrame implements ActionListener {
                 }
             }
         }
-        
-        long end = System.currentTimeMillis(); // Gets the current time after the backtracking algo stops
-        outputArea.append("Successes: " + successes + "\nFailures: " + failures + "\n");
-        double percentSuccess = (successes/20.0)*100;
+
+        // Success/Failure statistics
+        outputArea.append("\nSuccesses: " + successes + ", Failures: " + failures + "\n");
+        outputArea.append("Failures from plateaus: " + failuresPlateau + "\n");
+        outputArea.append("Failures from ridges: " + failuresRidge + "\n");
+        outputArea.append("Failures from local maxima: " + failuresLocalMaxima + "\n");
+        double percentSuccess = (successes / 20.0) * 100;
         String percentSuccessStr = String.format("%.2f", percentSuccess);
         outputArea.append("Found a solution " + percentSuccessStr + "% of the time\n");
+
+        // Elapsed time statistic
+        long end = System.currentTimeMillis(); // Gets the current time after the backtracking algo stops
         outputArea.append("Elapsed time: " + (end - start) + " ms\n\n");
+
+        // Displays this in the outputArea to let user know that they are viewing the last generated board.
         boardsIndex = boards.size() - 1;
         outputArea.append("Showing Attempt #" + (boardsIndex + 1) + "\n");
-        //outputArea.append("Heuristic " + hillclimbingCalculateHeuristic() + "\n");
+
+        // Enables the '<' button since we are starting at the upper limit of the boards array.
         leftButton.setEnabled(true);
+        
         solved = true;
     }
 
+    // Calculates heuristics within the SAHC algo //
     private int hillclimbingCalculateHeuristic() {
         int h = 0;
+        
+        // Traverses the board's columns, finds the row of the queen in that column, then
+        // loops through the remaining columns to see if there are any queens attacking it.
+        // If an attacking queen is found, the heuristic is incremented.
         for (int i = 0; i < n; i++) {
             int row = hillclimbingGetQueenRow(i);
             for (int j = i + 1; j < n; j++) {
@@ -280,15 +378,20 @@ public class NQueens extends JFrame implements ActionListener {
         return h;
     }
 
-
+    // Generates a board with random placement of n queens within the SAHC algo //
     private void hillClimbingPlaceQueensRandomly() {
+        
+        // Traverses the board's columns and assigns a queen to a random row of that column.
         for (int i = 0; i < n; i++) {
             int row = (int) (Math.random() * n);
             hillclimbingMoveQueen(i, row);
         }
     }
 
+    // Gets the row of a specified queen within the SAHC algo //
     private int hillclimbingGetQueenRow(int column) {
+        
+        // Traverses the board's rows and returns the row if a queen is found.
         for (int i = 0; i < n; i++) {
             if (queens[column][i]) {
                 return i;
@@ -297,7 +400,11 @@ public class NQueens extends JFrame implements ActionListener {
         return -1;
     }
 
+    // Moves a specified queen within the SAHC algo //
     private void hillclimbingMoveQueen(int column, int row) {
+        
+        // Finds the current row of the queen, removes it, then adds it
+        // into the new row. The board is then updated.
         int currentRow = hillclimbingGetQueenRow(column);
         if (currentRow != -1) {
             queens[column][currentRow] = false;
@@ -306,7 +413,11 @@ public class NQueens extends JFrame implements ActionListener {
         hillclimbingUpdateBoard();
     }
 
+    // Updates the board within the SAHC algo //
     private void hillclimbingUpdateBoard() {
+        
+        // Traverses the board to find new queen positions and then colors their corresponding
+        // tile positions.
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 if (queens[j][i]) {
@@ -320,9 +431,10 @@ public class NQueens extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+
         //Action for pressing the enter button on the 'Enter N' GUI
         if (e.getSource() == createBoardButton) {
-            
+
             try {
                 int n = Integer.parseInt(inputField.getText());
                 if (n >= 4) {
@@ -338,23 +450,25 @@ public class NQueens extends JFrame implements ActionListener {
             }
         }
         
-        else if(e.getSource() == leftButton) {
+        // Action for pressing the '<' traversal button
+        else if (e.getSource() == leftButton) {
+
+            // Decrements the boardsIndex variable and sets the currentBoard array to the queens array found at that index
             boardsIndex--;
             boolean[][] currentBoard = boards.get(boardsIndex).clone();
-            
-            for(int i = 0; i < n; i++) {
-                for(int j = 0; j < n; j++) {
-														
-                    if(currentBoard[j][i]) {
+
+            // Traverses the board and sets the queens booleans to match those of the currentBoard array.
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    if (currentBoard[j][i]) {
                         queens[j][i] = true;
-															   
-                    }
-                    else {
+                    } else {
                         queens[j][i] = false;
                     }
                 }
             }
-            
+
+            // Traverses the board and sets the tiles colors to match those of the queens array.
             for (int i = 0; i < n; i++) {
                 for (int j = 0; j < n; j++) {
                     if (queens[j][i]) {
@@ -365,34 +479,38 @@ public class NQueens extends JFrame implements ActionListener {
                 }
             }
 
-            if(boardsIndex == 0) {
+            // Disables the '<' button if reached the lower limit of the boards array.
+            if (boardsIndex == 0) {
                 leftButton.setEnabled(false);
             }
-            
-            if(boardsIndex > 0) {
+
+            // Enables the '>' button if not at the lower limit of the boards array.
+            if (boardsIndex > 0) {
                 rightButton.setEnabled(true);
             }
-            
+
             outputArea.append("Showing Attempt #" + (boardsIndex + 1) + "\n");
         }
-        
-        else if(e.getSource() == rightButton) {
+
+        // Action for pressing the '>' traversal button
+        else if (e.getSource() == rightButton) {
+
+            // Increments the boardsIndex variable and sets the currentBoard array to the queens array found at that index
             boardsIndex++;
             boolean[][] currentBoard = boards.get(boardsIndex).clone();
-            
-            for(int i = 0; i < n; i++) {
-                for(int j = 0; j < n; j++) {
-														
-                    if(currentBoard[j][i]) {
+
+            // Traverses the board and sets the queens booleans to match those of the currentBoard array.
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    if (currentBoard[j][i]) {
                         queens[j][i] = true;
-															   
-                    }
-                    else {
+                    } else {
                         queens[j][i] = false;
                     }
                 }
             }
-            
+
+            // Traverses the board and sets the queens booleans to match those of the currentBoard array.
             for (int i = 0; i < n; i++) {
                 for (int j = 0; j < n; j++) {
                     if (queens[j][i]) {
@@ -402,21 +520,29 @@ public class NQueens extends JFrame implements ActionListener {
                     }
                 }
             }
-            
-            if(boardsIndex == boards.size() - 1) {
+
+            // Disables the '>' button if reached the upper limit of the boards array.
+            if (boardsIndex == boards.size() - 1) {
                 rightButton.setEnabled(false);
             }
-            
-            if(boardsIndex >= 1) {
+
+            // Enables the '<' button if not at the upper limit of the boards array.
+            if (boardsIndex >= 1) {
                 leftButton.setEnabled(true);
             }
-            
+
             outputArea.append("Showing Attempt #" + (boardsIndex + 1) + "\n");
         }
         
-        // Action for pressing the backtracking button
+        // Action for pressing the Recursive Backtracking button
         else if (e.getSource() == backtrackingButton) {
-            // Resets the board if a solution has been found and user selects an algorithm without hitting reset button
+
+            // Disables the left/right traversal buttons as there is only one solution presented at a time with Recursive Backtracking
+            leftButton.setEnabled(false);
+            rightButton.setEnabled(false);
+
+            // Resets the board if a solution has been found and user selects an algorithm without hitting reset button.
+            // The outputArea is cleared and solved boolean is reset to default.
             if (solved) {
                 for (int i = 0; i < n; i++) {
                     for (int j = 0; j < n; j++) {
@@ -429,14 +555,22 @@ public class NQueens extends JFrame implements ActionListener {
                 solved = false;
             }
 
-            int[] count = new int[1]; // Initialization for the amount of steps taken during one run of the backtracking algo
+            // Initialization for the amount of steps taken during one run of the Recursive Backtracking algo
+            int[] count = new int[1];
+
+            // Records starting and ending times for the Recursive Backtracking algo in order to display elapsed time.
+            // Recursive Backtracking algorithm is called and starts in the first column.
+            long start = System.currentTimeMillis();
             backtracking(0, count);
-        }
-        
-        // Action for pressing the hillclimbing button
+            long end = System.currentTimeMillis();
+            outputArea.append("Elapsed time: " + (end - start) + " ms\n\n");
+        } 
+
+        // Action for pressing the Steepest Ascent Hillclimbing button
         else if (e.getSource() == hillclimbingButton) {
-            // Resets the board if a solution has been found and user selects an algorithm without 
-            // hitting reset button
+
+            // Resets the board if a solution has been found and user selects an algorithm without hitting reset button.
+            // The outputArea is cleared and solved boolean is reset to default.
             if (solved) {
                 for (int i = 0; i < n; i++) {
                     for (int j = 0; j < n; j++) {
@@ -444,22 +578,19 @@ public class NQueens extends JFrame implements ActionListener {
                         tiles[j][i].setBackground(null);
                     }
                 }
-                
-                // Clears the output area
                 outputArea.selectAll();
                 outputArea.replaceSelection(null);
-                
-                // Resets solved boolean
                 solved = false;
             }
 
+            // Initialization for the amount of times the SAHC algo finds a solution.
             int[] attempts = new int[1];
             attempts[0]++;
+
             hillclimbing(attempts);
-        }
-        
-        // Action for pressing the reset button
+        } // Action for pressing the Reset button
         else if (e.getSource() == resetButton) {
+
             // Removes all queen positions and tile colors
             for (int i = 0; i < n; i++) {
                 for (int j = 0; j < n; j++) {
@@ -467,17 +598,15 @@ public class NQueens extends JFrame implements ActionListener {
                     tiles[j][i].setBackground(null);
                 }
             }
-            
+
             // Clears the outputArea
             outputArea.selectAll();
             outputArea.replaceSelection(null);
-            
-            boards.clear();
-            
+
             // Resets left and right board traversal buttons
             leftButton.setEnabled(false);
             rightButton.setEnabled(false);
-            
+
             // Resets solved boolean
             solved = false;
         }
